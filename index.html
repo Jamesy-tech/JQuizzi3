@@ -336,7 +336,60 @@ const quiz = [
         w.document.write(`<!DOCTYPE html><html><head><link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cal+Sans&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Mulish:ital,wght@0,200..1000;1,200..1000&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet"><meta charset=\"UTF-8\"><title>${quizNameEl.textContent}</title><style>
-          body{font-family:"Mulish"; max-width:1000px;margin:0px auto; padding-top:40px; background:#eaf0fb; }
+         
+  body {
+  font-family: "Mulish";
+  margin: 0 auto;
+  padding: 20px;
+  background: #eaf0fb;
+  max-width: 1000px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Responsive for small screens */
+@media (max-width: 700px) {
+  body {
+    padding: 15px;
+  }
+
+  #question {
+    font-size: 2rem;
+  }
+
+  #answerInput {
+    font-size: 1rem;
+    padding: 10px;
+  }
+
+  #submitBtn {
+    font-size: 0.95rem;
+    padding: 10px 25px;
+    margin-left: 0;
+    width: 100%;
+  }
+
+  #options label {
+    font-size: 18px;
+    padding: 10px;
+  }
+
+  table {
+    font-size: 0.9rem;
+    word-wrap: break-word;
+  }
+
+  th, td {
+    padding: 6px;
+  }
+
+  .exit-quiz {
+    width: 100%;
+    font-size: 1rem;
+    padding: 10px 0;
+  }
+}
+
           * {
           font-family:'Mulish';
           }
@@ -421,7 +474,7 @@ const quiz = [
               if(user){
                 cls=(user.toLowerCase()===correct.toLowerCase())?'correct':'wrong';
               }
-              html+='<tr class="'+cls+'"><td>'+ (i+1) +'</td><td>'+user+'</td><td>'+correct+'</td></tr>';
+              html+='<tr class="'+cls+'"><td>'+(i+1)+'. '+q.q+'</td><td>'+user+'</td><td>'+correct+'</td></tr>';
             });
             html+='</table><button class="exit-quiz" onclick="window.close()">Exit</button>';
             container.innerHTML=html;
