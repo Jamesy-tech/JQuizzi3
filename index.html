@@ -42,7 +42,17 @@
 
     #sidenav button:hover,
     #sidenav a:hover { 
-        background: #dde7f5;;
+        background: #dde7f5;
+     }
+
+     #sidenav a.active:hover {
+        background:#005cb2 !important;
+        color:white !important;
+     }
+
+     #sidenav a.active:focus {
+        background:#005cb2 !important;
+        color:white !important;
      }
 
      .active {
@@ -50,7 +60,17 @@
         color:white !important;
      }
 
-    #main { flex: 1; padding: 20px; overflow: auto; }
+     .active:hover {
+        background:#005cb2 !important;
+        color:white !important;
+     }
+
+     .active:focus {
+        background:#005cb2 !important;
+        color:white !important;
+     }
+
+     #main { flex: 1; padding: 20px; overflow: auto; }
     
 
     .quiz-card {
@@ -136,6 +156,7 @@
     .dashboard_title {
        display:block;
        margin-top:10px;
+       font-weight: 400;
        margin-bottom:14px;
     }
 
@@ -432,4 +453,3 @@ document.getElementById("deleteBtn").onclick = deleteQuiz;
   </script>
 </body>
 </html>
-
