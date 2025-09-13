@@ -32,8 +32,6 @@
       color: black;
       text-align: left;
       font-family:"Mulish";
-       transition: background 0.3s;
-           transition: color 0.4s;
       padding: 8px;
       cursor: pointer;
       font-size: 1rem;
@@ -43,7 +41,8 @@
 
     #sidenav button:hover,
     #sidenav a:hover { 
-        background: #dde7f5;
+   /*     background: #dde7f5; */
+          text-decoration:underline;
      }
 
      #sidenav a.active:hover {
@@ -126,6 +125,18 @@
       cursor: pointer;
     }
 
+        .toolbarBtn {
+      background: #005cb2;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 7px;
+      padding-left:35px;
+      padding-right:35px;
+      font-family:"Mulish";
+      cursor: pointer;
+    }
+
       #deleteBtn {
       background: #b20000;
       color: #fff;
@@ -176,8 +187,8 @@
     #btnNewQuiz:focus {
         color:white;
           background:#005cb2;
-          transition: background 0.3s;
-           transition: color 0.4s;
+        /*  transition: background 0.3s;
+           transition: color 0.4s; */
     }
 
     table.result { width: 100%; border-collapse: collapse; }
@@ -188,7 +199,10 @@
 </head>
 <body>
   <nav id="sidenav">
-    <h1>JQuizzi3 Create</h1>
+
+    <img src="images/icon.png" style="width:80px;">
+
+    <h1>Quiz Creator</h1>
 
      <button id="btnNewQuiz">New quiz</button>
 
@@ -206,7 +220,7 @@
       <div id="editorNav">
         <span id="quizName" contenteditable="true">Untitled Quiz</span>
         <span id="appTitle"></span>
-        <button id="deleteBtn">Delete</button> <button id="previewBtn">Run</button>
+        <button id="deleteBtn">Delete</button> <button class="toolbarBtn">Save as...</button> <button id="previewBtn">Run</button>
       </div>
       <textarea id="editor">
 const quiz = [
@@ -321,170 +335,124 @@ const quiz = [
       quizNameEl.oninput = save;
       editor.addEventListener("input", debounce(save, 800));
 
-      document.getElementById("previewBtn").onclick = () => {
-        save();
-        let quiz;
-        try {
-          quiz = new Function(editor.value + "\nreturn typeof quiz !== 'undefined' ? quiz : [];")();
-        } catch (e) {
-          alert("Error parsing your quiz code: " + e.message);
-          return;
-        }
-        if (!Array.isArray(quiz) || quiz.length === 0) {
-          alert("Quiz array is empty or invalid.");
-          return;
-        }
-        const w = window.open("", "_blank");
-        w.document.write(`<!DOCTYPE html><html><head><link rel="preconnect" href="https://fonts.googleapis.com">
+
+  function preview(mode = "view") { // mode can be "view" or "download"
+  save(); // Save current edits first
+  let quiz;
+  try {
+    quiz = new Function(editor.value + "\nreturn typeof quiz !== 'undefined' ? quiz : [];")();
+  } catch (e) {
+    alert("Error parsing your quiz code: " + e.message);
+    return;
+  }
+
+  if (!Array.isArray(quiz) || quiz.length === 0) {
+    alert("Quiz array is empty or invalid.");
+    return;
+  }
+
+  const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>${quizNameEl.textContent}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cal+Sans&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Mulish:ital,wght@0,200..1000;1,200..1000&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet"><meta charset=\"UTF-8\"><title>${quizNameEl.textContent}</title><style>
-         
-  body {
-  font-family: "Mulish";
-  margin: 0 auto;
-  padding: 20px;
-  background: #eaf0fb;
-  max-width: 1000px;
-  width: 100%;
-  box-sizing: border-box;
+<link href="https://fonts.googleapis.com/css2?family=Mulish&display=swap" rel="stylesheet">
+<style>
+  body { font-family:'Mulish'; margin:0 auto; padding:20px; max-width:1000px; background:#eaf0fb; }
+  #question{font-size:3rem;margin-bottom:20px;}
+  #answerInput{width:100%;padding:12px;font-size:1.2rem;margin-bottom:10px;border-radius:8px;border:none;outline:none;}
+  #submitBtn{padding:8px 35px;font-size:1rem;margin-top:12px;background:#005cb2;border:none;border-radius:10px;color:white;cursor:pointer;}
+  #submitBtn:hover{filter:brightness(110%);}
+  #options label{display:block;margin-bottom:5px;font-size:22px;background:white;padding:5px 7px;border-radius:5px;cursor:pointer;}
+  table{width:100%;border-collapse:collapse;margin-top:20px;}
+  th,td{border:1px solid #ddd;padding:8px;text-align:left;}
+  .correct{background:#c8e6c9;}
+  .wrong{background:#ffcdd2;}
+  .blank{background:white;}
+  .exit-quiz{display:block;margin-top:15px;padding:9px;width:100px;background:#005cb2;color:white;border-radius:12px;border:none;cursor:pointer;}
+  .exit-quiz:hover{filter:brightness(110%);}
+</style>
+</head>
+<body>
+<h1>${quizNameEl.textContent}</h1>
+<div id="quizContainer"></div>
+<script>
+  const quiz=${JSON.stringify(quiz)};
+  let current=0,answers=[];
+  const container=document.getElementById('quizContainer');
+
+  function showQuestion(){
+    if(current>=quiz.length){ return showResults(); }
+    const q=quiz[current];
+    const type=q.type||'input';
+    let html='<div id="question">'+q.q+'</div>';
+    if(type==='choice'){
+      html+='<div id="options">';
+      (q.opts||[]).forEach(opt=>{html+='<label><input type="radio" name="opt" value="'+opt+'"> '+opt+'</label>';});
+      html+='</div>';
+    }else{
+      html+='<input id="answerInput" autocomplete="off">';
+    }
+    html+='<button id="submitBtn">Next</button>';
+    container.innerHTML=html;
+
+    const submit=()=>{
+      let val='';
+      if(type==='choice'){
+        const r=document.querySelector('input[name="opt"]:checked');
+        val=r?r.value:'';
+      }else{
+        val=document.getElementById('answerInput').value.trim();
+      }
+      answers.push(val);
+      current++;
+      showQuestion();
+    };
+
+    document.getElementById('submitBtn').onclick=submit;
+    if(type==='input'){
+      const inp=document.getElementById('answerInput');
+      inp.addEventListener('keydown',e=>{if(e.key==='Enter') submit();});
+      inp.focus();
+    }
+  }
+
+  function showResults(){
+    let html='<h2>Review</h2><table><tr><th>#</th><th>Your Answer</th><th>Correct Answer</th></tr>';
+    quiz.forEach((q,i)=>{
+      const user=answers[i]||'';
+      const correct=q.a;
+      const cls='blank'+(user?(user.toLowerCase()===correct.toLowerCase()?' correct':' wrong'):'');
+      html+='<tr class="'+cls+'"><td>'+(i+1)+'. '+q.q+'</td><td>'+user+'</td><td>'+correct+'</td></tr>';
+    });
+    html+='</table><button class="exit-quiz" onclick="window.close()">Exit</button>';
+    container.innerHTML=html;
+  }
+
+  showQuestion();
+<\/script>
+</body>
+</html>`;
+
+  if (mode === "download") {
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = quizNameEl.textContent.trim().replace(/\s+/g,'_') + '.html';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  } else {
+    const w = window.open("", "_blank");
+    w.document.write(htmlContent);
+    w.document.close();
+  }
 }
 
-/* Responsive for small screens */
-@media (max-width: 700px) {
-  body {
-    padding: 15px;
-  }
-
-  #question {
-    font-size: 2rem;
-  }
-
-  #answerInput {
-    font-size: 1rem;
-    padding: 10px;
-  }
-
-  #submitBtn {
-    font-size: 0.95rem;
-    padding: 10px 25px;
-    margin-left: 0;
-    width: 100%;
-  }
-
-  #options label {
-    font-size: 18px;
-    padding: 10px;
-  }
-
-  table {
-    font-size: 0.9rem;
-    word-wrap: break-word;
-  }
-
-  th, td {
-    padding: 6px;
-  }
-
-  .exit-quiz {
-    width: 100%;
-    font-size: 1rem;
-    padding: 10px 0;
-  }
-}
-
-          * {
-          font-family:'Mulish';
-          }
-          #question{font-size:3rem;margin-bottom:20px;}
-          #answerInput{width:100%;padding:12px;font-size:1.2rem;margin-bottom:10px; border-radius:8px; border:none; outline:none; }
-          #submitBtn{padding:8px 35px;font-size:1rem; margin-top:12px; margin-left:10px; background: #005cb2; border:none; border-radius: 10px; color:white; cursor:pointer; }
-          #submitBtn:hover{filter:brightness(110%);}
-          #options label{display:block;margin-bottom:5px; font-size:22px; background: white; padding-top:5px; padding-bottom:5px; border-radius:5px; padding-left:7px; cursor:pointer; }
-          table{width:100%;border-collapse:collapse;margin-top:20px;}
-          th,td{border:1px solid #ddd;padding:8px;text-align:left;}
-          .correct{background:#c8e6c9;}
-          .wrong{background:#ffcdd2;}
-          .blank{background:white;}
-          .exit-quiz {
-            display:block;
-            margin-top:15px;
-            padding:5px;
-            width:100px;
-            background:#005cb2;
-            color:white;
-            border-radius:12px;
-            border:none;
-            padding-top:9px;
-            padding-bottom:9px;
-            cursor:pointer;
-          }
-
-          .exit-quiz:hover {
-             filter:brightness(110%);
-          }
-
-        </style></head><body><h1>${quizNameEl.textContent}</h1><div id=\"quizContainer\"></div><script>
-          const quiz=${JSON.stringify(quiz)};
-          let current=0, answers=[];
-          const container=document.getElementById('quizContainer');
-
-          function showQuestion(){
-            if(current>=quiz.length){ return showResults(); }
-            const q=quiz[current];
-            const type=q.type||'input';
-            let html='<div id="question">'+q.q+'</div>';
-            if(type==='choice'){
-              html+='<div id="options">';
-              (q.opts||[]).forEach((opt)=>{html+='<label><input type="radio" name="opt" value="'+opt+'"> '+opt+'</label>';});
-              html+='</div>';
-            }else{
-              html+='<input id="answerInput" autocomplete="off">';
-            }
-            html+='<button id="submitBtn">Submit</button>';
-            container.innerHTML=html;
-
-            const submit=()=>{
-              let val='';
-              if(type==='choice'){
-                const r=document.querySelector('input[name="opt"]:checked');
-                val=r?r.value:'';
-              }else{
-                val=document.getElementById('answerInput').value.trim();
-              }
-              answers.push(val);
-              current++;
-              showQuestion();
-            };
-
-            document.getElementById('submitBtn').onclick=submit;
-            if(type==='input'){
-              const inp=document.getElementById('answerInput');
-              inp.addEventListener('keydown',e=>{if(e.key==='Enter') submit();});
-              inp.focus();
-            }else{
-              const optionsDiv = document.getElementById('options');
-              optionsDiv.addEventListener('keydown',function handler(e){if(e.key==='Enter'){submit(); optionsDiv.removeEventListener('keydown',handler);} });
-            }
-          }
-
-          function showResults(){
-            let html='<h2>Review</h2><table><tr><th>#</th><th>Your Answer</th><th>Correct Answer</th></tr>';
-            quiz.forEach((q,i)=>{
-              const user=answers[i]||'';
-              const correct=q.a;
-              let cls='blank';
-              if(user){
-                cls=(user.toLowerCase()===correct.toLowerCase())?'correct':'wrong';
-              }
-              html+='<tr class="'+cls+'"><td>'+(i+1)+'. '+q.q+'</td><td>'+user+'</td><td>'+correct+'</td></tr>';
-            });
-            html+='</table><button class="exit-quiz" onclick="window.close()">Exit</button>';
-            container.innerHTML=html;
-          }
-          showQuestion();
-        <\/script></body></html>`);
-        w.document.close();
-      };
+document.getElementById("previewBtn").onclick = () => preview("view");
+document.querySelector(".toolbarBtn").onclick = () => preview("download");
+    
 
       showHome();
 
