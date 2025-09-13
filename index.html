@@ -102,8 +102,12 @@
       border-bottom: 2px dashed #ccc;
       padding-bottom:4px;
       padding-top:4px;
+      max-width:300px;
       outline:none;
-      min-width: 150px;
+      min-width: 80px;
+      overflow-x:hidden;
+      overflow-y:scroll;
+      height: 34px;
       padding-left:5px;
     }
 
@@ -135,6 +139,10 @@
       padding-right:35px;
       font-family:"Mulish";
       cursor: pointer;
+    }
+
+    .toolbarBtn:hover {
+        filter:brightness(110%);
     }
 
       #deleteBtn {
@@ -220,7 +228,7 @@
       <div id="editorNav">
         <span id="quizName" contenteditable="true">Untitled Quiz</span>
         <span id="appTitle"></span>
-        <button id="deleteBtn">Delete</button> <button class="toolbarBtn">Save as...</button> <button id="previewBtn">Run</button>
+        <button id="deleteBtn">Delete</button> <button class="toolbarBtn">Save</button> <button id="previewBtn">Run</button>
       </div>
       <textarea id="editor">
 const quiz = [
