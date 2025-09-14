@@ -422,7 +422,7 @@ function showQuestion() {
 function submit() {
   if (!canSubmit) return;
   canSubmit = false;
-  setTimeout(() => canSubmit = true, 1000);
+  setTimeout(() => canSubmit = true, 250);
 
   const q = quiz[current];
   const type = q.type || 'input';
