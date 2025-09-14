@@ -406,25 +406,35 @@ const quiz = [
     html+='<button id="submitBtn">Next</button>';
     container.innerHTML=html;
 
-    const submit=()=>{
-      let val='';
-      if(type==='choice'){
-        const r=document.querySelector('input[name="opt"]:checked');
-        val=r?r.value:'';
-      }else{
-        val=document.getElementById('answerInput').value.trim();
-      }
-      answers.push(val);
-      current++;
-      showQuestion();
-    };
+   
+    const submit = () => {
+  let val = '';
+  if (type === 'choice') {
+    const r = document.querySelector('input[name="opt"]:checked');
+    val = r ? r.value : '';
+  } else {
+    val = document.getElementById('answerInput').value.trim();
+  }
+  answers.push(val);
+  current++;
+  showQuestion();
+};
 
-    document.getElementById('submitBtn').onclick=submit;
-    if(type==='input'){
-      const inp=document.getElementById('answerInput');
-      inp.addEventListener('keydown',e=>{if(e.key==='Enter') submit();});
-      inp.focus();
-    }
+document.getElementById('submitBtn').onclick = submit;
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    submit();
+  }
+});
+
+if (type === 'input') {
+  const inp = document.getElementById('answerInput');
+  inp.focus();
+}
+
+
+
   }
 
 function showResults(){
